@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAKSHAM AI — One Platform. Endless Intelligence.</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .chat-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-scroll::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up {
+      animation: fadeSlideUp 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Top Navigation -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <!-- Brand -->
+      <button type="button" id="brand-home-btn" class="flex items-center gap-2.5 text-left focus:outline-none group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-slate-900 tracking-tight text-base sm:text-lg">SAKSHAM AI</span>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">100% Free Core</span>
+          </div>
+          <p class="text-[11px] text-slate-500 hidden sm:block">One Platform. Endless Intelligence.</p>
+        </div>
+      </button>
+
+      <!-- Desktop Nav Tabs -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl" aria-label="Primary Navigation">
+        <button type="button" data-tab="workspace" class="nav-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5">
+          <i data-lucide="message-square" class="w-4 h-4"></i>
+          <span>AI Workspace</span>
+        </button>
+        <button type="button" data-tab="revenue" class="nav-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          <span>Revenue Model</span>
+        </button>
+        <button type="button" data-tab="roadmap" class="nav-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>5-Stage Roadmap</span>
+        </button>
+        <button type="button" data-tab="api" class="nav-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5">
+          <i data-lucide="code-2" class="w-4 h-4"></i>
+          <span>Business API</span>
+        </button>
+      </nav>
+
+      <!-- Right Action -->
+      <div class="flex items-center gap-2">
+        <button type="button" id="ai-engine-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors">
+          <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+          <span id="ai-engine-label">Demo AI</span>
+        </button>
+        <button type="button" id="philosophy-modal-btn" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>Zero-Paywall</span>
+        </button>
+        <button type="button" id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100" aria-label="Toggle Menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Nav Drawer -->
+    <div id="mobile-nav" class="hidden md:hidden border-t border-slate-200 bg-white px-4 py-2 space-y-1">
+      <button type="button" data-tab="workspace" class="mobile-nav-tab w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="message-square" class="w-4 h-4"></i> AI Workspace
+      </button>
+      <button type="button" data-tab="revenue" class="mobile-nav-tab w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="trending-up" class="w-4 h-4"></i> Revenue Model
+      </button>
+      <button type="button" data-tab="roadmap" class="mobile-nav-tab w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="layers" class="w-4 h-4"></i> 5-Stage Roadmap
+      </button>
+      <button type="button" data-tab="api" class="mobile-nav-tab w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+        <i data-lucide="code-2" class="w-4 h-4"></i> Business API
+      </button>
+    </div>
+  </header>
+
+  <!-- Core Philosophy Hero Strip -->
+  <section class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-indigo-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-300 mb-1">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          <span>Core Philosophy</span>
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight">
+          Free for Everyone. Built for the Future.
+        </h1>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+        <div class="bg-white/10 border border-white/15 rounded-xl px-3 py-2 flex items-center gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+          <span class="font-medium text-slate-100">All Essential AI Free</span>
+        </div>
+        <div class="bg-white/10 border border-white/15 rounded-xl px-3 py-2 flex items-center gap-2">
+          <i data-lucide="message-square-off" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+          <span class="font-medium text-slate-100">No Chat Ads</span>
+        </div>
+        <div class="bg-white/10 border border-white/15 rounded-xl px-3 py-2 flex items-center gap-2">
+          <i data-lucide="ban" class="w-4 h-4 text-violet-300 shrink-0"></i>
+          <span class="font-medium text-slate-100">No Forced Subs</span>
+        </div>
+        <div class="bg-white/10 border border-white/15 rounded-xl px-3 py-2 flex items-center gap-2">
+          <i data-lucide="wallet" class="w-4 h-4 text-amber-300 shrink-0"></i>
+          <span class="font-medium text-slate-100">No Forced Payments</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- TAB 1: AI WORKSPACE (Ad-Free Chat + Dashboard Sidebar Ads) -->
+    <section id="view-workspace" class="tab-view space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Left / Center: Ad-Free AI Conversation -->
+        <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden" style="min-height: 540px; max-height: 680px;">
+          <!-- Chat Header -->
+          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+            <div class="flex items-center gap-3">
+              <div id="ai-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+              <div>
+                <h2 class="text-sm font-semibold text-slate-900">SAKSHAM Assistant</h2>
+                <p id="ai-subtitle" class="text-xs text-slate-500">Zero interruptions • No ads inside chat • Essential tools unlocked</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="ai-mode-select" class="text-xs font-medium bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="general">General Intelligence</option>
+                <option value="code">Code & Architecture</option>
+                <option value="study">Study & Research</option>
+                <option value="business">Business Strategy</option>
+              </select>
+              <button type="button" id="clear-chat-btn" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" title="New Conversation">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages Area -->
+          <div id="chat-messages" class="flex-1 p-5 space-y-4 overflow-y-auto chat-scroll bg-white">
+            <!-- Populated by JS -->
+          </div>
+
+          <!-- Quick Prompts -->
+          <div class="px-5 py-2.5 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-2">
+            <button type="button" class="quick-prompt-btn text-xs bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-200 px-3 py-1.5 rounded-full transition-colors">
+              Why are there no ads in this chat?
+            </button>
+            <button type="button" class="quick-prompt-btn text-xs bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-200 px-3 py-1.5 rounded-full transition-colors">
+              How do I earn money with $0 budget?
+            </button>
+            <button type="button" class="quick-prompt-btn text-xs bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-200 px-3 py-1.5 rounded-full transition-colors">
+              Explain the 5 launch stages
+            </button>
+          </div>
+
+          <!-- Input Bar -->
+          <form id="chat-form" class="p-4 bg-white border-t border-slate-200 flex items-center gap-2.5">
+            <input
+              type="text"
+              id="chat-input"
+              placeholder="Ask SAKSHAM AI anything — 100% free, zero chat interruptions..."
+              class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+              autocomplete="off"
+            />
+            <button type="submit" id="send-btn" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl flex items-center gap-1.5 shadow-sm transition-colors shrink-0">
+              <span>Send</span>
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- Right Sidebar: Dashboard Monetization Zone (Non-Intrusive) -->
+        <aside class="lg:col-span-4 space-y-4">
+          <!-- UX Guarantee Card -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600">Dashboard Zone</span>
+              <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Non-Intrusive</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Revenue elements live strictly on the dashboard sidebar—never inside your AI conversation stream.
+            </p>
+          </div>
+
+          <!-- 1. Small Advertisement on Dashboard -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Small Dashboard Ad</span>
+              <button type="button" id="rotate-ad-btn" class="text-[11px] text-indigo-600 hover:underline font-medium">Next Partner</button>
+            </div>
+            <div id="dashboard-ad-slot" class="rounded-xl bg-gradient-to-br from-slate-50 to-indigo-50/60 border border-indigo-100 p-3.5">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- 2. Affiliate Commission Card -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Affiliate Tool Pick</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-400"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900">Cloud GPU & Hosting</h3>
+            <p class="text-xs text-slate-600 mt-1 mb-3">
+              Deploy your SAKSHAM API projects with partner credits. Earns SAKSHAM AI a transparent affiliate commission at no extra cost to you.
+            </p>
+            <button type="button" id="affiliate-cta-btn" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
+              <span>Explore Partner Offer</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <!-- 3. Corporate Sponsorship Badge -->
+          <div class="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-2xl p-4 text-white shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-200">Corporate Sponsorship</span>
+              <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
+            </div>
+            <h3 class="text-sm font-bold">Open Education Initiative</h3>
+            <p class="text-xs text-indigo-100 mt-1 leading-relaxed">
+              Sponsored compute grants keep SAKSHAM AI free for students, creators, and small teams worldwide.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- TAB 2: REVENUE MODEL & SIMULATOR -->
+    <section id="view-revenue" class="tab-view hidden space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900">Dashboard Ads</h3>
+          <p class="text-xs text-slate-600 mt-1">Small, non-intrusive placements on the dashboard only. Never in chat.</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="w-9 h-9 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center mb-3">
+            <i data-lucide="handshake" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900">Business Partnerships</h3>
+          <p class="text-xs text-slate-600 mt-1">Co-branded integrations and ecosystem workflows with partner tools.</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
+            <i data-lucide="percent" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900">Affiliate Commissions</h3>
+          <p class="text-xs text-slate-600 mt-1">Curated software & cloud recommendations with zero user markup.</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+            <i data-lucide="terminal" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900">Paid Business API</h3>
+          <p class="text-xs text-slate-600 mt-1">High-throughput commercial API access, SLAs, and enterprise endpoints.</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center mb-3">
+            <i data-lucide="building-2" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900">Corporate Sponsorships</h3>
+          <p class="text-xs text-slate-600 mt-1">Mission-aligned sponsors funding free AI compute for everyone.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Revenue Simulator -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-5">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Revenue Sustainability Simulator</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Adjust scale assumptions to see how B2B & non-intrusive streams fund free consumer AI.</p>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-slate-700">Monthly Active Free Users</span>
+                <span id="val-mau" class="font-bold text-indigo-600">100,000</span>
+              </div>
+              <input id="sim-mau" type="range" min="10000" max="1000000" step="10000" value="100000" class="w-full accent-indigo-600" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-slate-700">Paid Business API Clients</span>
+                <span id="val-api-clients" class="font-bold text-emerald-600">120</span>
+              </div>
+              <input id="sim-api-clients" type="range" min="10" max="1000" step="10" value="120" class="w-full accent-emerald-600" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-slate-700">Active Corporate Sponsors</span>
+                <span id="val-sponsors" class="font-bold text-violet-600">4</span>
+              </div>
+              <input id="sim-sponsors" type="range" min="0" max="20" step="1" value="4" class="w-full accent-violet-600" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-slate-700">Business Partnerships & Affiliates</span>
+                <span id="val-partners" class="font-bold text-amber-600">15</span>
+              </div>
+              <input id="sim-partners" type="range" min="1" max="50" step="1" value="15" class="w-full accent-amber-600" />
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 grid grid-cols-2 gap-3">
+            <div class="bg-slate-50 rounded-xl p-3">
+              <span class="text-[11px] text-slate-500 block">Est. Monthly Revenue</span>
+              <span id="total-monthly-rev" class="text-lg font-bold text-slate-900">$0</span>
+            </div>
+            <div class="bg-emerald-50 rounded-xl p-3">
+              <span class="text-[11px] text-emerald-700 block">User Subscription Cost</span>
+              <span class="text-lg font-bold text-emerald-700">$0 / mo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Revenue Mix Breakdown</h3>
+              <p class="text-xs text-slate-500">Projected monthly contribution across all 5 channels</p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700">Live Model</span>
+          </div>
+          <div class="relative h-72 w-full">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: 5-STAGE DEVELOPMENT ROADMAP -->
+    <section id="view-roadmap" class="tab-view hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Five Major Development Stages</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Click any stage to inspect deliverables or update its simulated build status.</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-slate-500">Overall Progress:</span>
+            <span id="roadmap-progress-badge" class="font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">1 / 5 Completed</span>
+          </div>
+        </div>
+
+        <div id="roadmap-stages-grid" class="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-6"></div>
+        <div id="roadmap-detail-panel" class="rounded-2xl bg-slate-50 border border-slate-200 p-5"></div>
+      </div>
+    </section>
+
+    <!-- TAB 4: BUSINESS API & PARTNERSHIPS -->
+    <section id="view-api" class="tab-view hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="inline-block text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 mb-3">For Individuals</span>
+            <h3 class="text-lg font-bold text-slate-900">SAKSHAM Core</h3>
+            <div class="mt-2 flex items-baseline gap-1">
+              <span class="text-3xl font-extrabold text-slate-900">$0</span>
+              <span class="text-xs text-slate-500">/ forever</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-2">All essential AI features remain free with zero ads interrupting your chats.</p>
+            <ul class="mt-4 space-y-2 text-xs text-slate-700">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Unlimited essential AI chat</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Web & Android app access</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> No compulsory subscriptions</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> No forced payments</li>
+            </ul>
+          </div>
+          <button type="button" data-action="launch-chat" class="mt-6 w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors">
+            Open Free Workspace
+          </button>
+        </div>
+
+        <div class="bg-slate-900 text-white rounded-2xl border border-slate-800 p-6 shadow-md flex flex-col justify-between">
+          <div>
+            <span class="inline-block text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 mb-3">Revenue Engine</span>
+            <h3 class="text-lg font-bold">Paid Business API</h3>
+            <div class="mt-2 flex items-baseline gap-1">
+              <span class="text-3xl font-extrabold">$199</span>
+              <span class="text-xs text-slate-400">/ mo base + usage</span>
+            </div>
+            <p class="text-xs text-slate-300 mt-2">High-throughput REST & streaming endpoints powering enterprise apps.</p>
+            <ul class="mt-4 space-y-2 text-xs text-slate-200">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> 99.9% uptime SLA & priority routing</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> Dedicated API keys & usage analytics</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> Custom rate limits & webhook events</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-cyan-400"></i> Directly subsidizes free public access</li>
+            </ul>
+          </div>
+          <button type="button" id="generate-api-key-btn" class="mt-6 w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors">
+            Generate Demo API Key
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="inline-block text-xs font-semibold px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200 mb-3">Partners & Sponsors</span>
+            <h3 class="text-lg font-bold text-slate-900">Corporate & Affiliate</h3>
+            <div class="mt-2 flex items-baseline gap-1">
+              <span class="text-3xl font-extrabold text-slate-900">Custom</span>
+              <span class="text-xs text-slate-500">/ partnership</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-2">Ethical brand visibility on the dashboard without ever disrupting AI workflows.</p>
+            <ul class="mt-4 space-y-2 text-xs text-slate-700">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-violet-600"></i> Small dashboard ad placements</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-violet-600"></i> Verified affiliate integrations</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-violet-600"></i> Corporate compute sponsorships</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-violet-600"></i> Co-branded business partnerships</li>
+            </ul>
+          </div>
+          <button type="button" id="partner-inquiry-btn" class="mt-6 w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors">
+            Request Partnership Kit
+          </button>
+        </div>
+      </div>
+
+      <!-- Demo API Key Output Box -->
+      <div id="api-key-box" class="hidden bg-slate-900 text-slate-100 rounded-2xl p-4 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[11px] uppercase tracking-wider text-cyan-400 font-semibold">Sandbox Business API Key</span>
+          <p id="api-key-value" class="font-mono text-sm mt-0.5 text-white"></p>
+        </div>
+        <button type="button" id="copy-api-key-btn" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-auto">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span>Copy Key</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Connect Free AI Key Modal -->
+  <div id="ai-engine-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="cpu" class="w-5 h-5 text-emerald-600"></i>
+          <h3 class="text-base font-bold text-slate-900">Connect Free Live AI (Optional)</h3>
+        </div>
+        <button type="button" id="close-engine-modal-btn" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Paste a free-tier <strong>Google Gemini API key</strong> (from Google AI Studio) to power real live AI responses right here in the browser, or leave blank to use built-in Demo Mode.
+      </p>
+      <div class="space-y-2">
+        <label for="gemini-key-input" class="block text-xs font-semibold text-slate-700">Free Gemini API Key</label>
+        <input id="gemini-key-input" type="password" placeholder="AIza..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      </div>
+      <div class="flex items-center gap-2 pt-1">
+        <button type="button" id="save-engine-key-btn" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors">
+          Save & Activate Live AI
+        </button>
+        <button type="button" id="reset-engine-key-btn" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors">
+          Use Demo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Philosophy Modal -->
+  <div id="philosophy-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-5 h-5 text-indigo-600"></i>
+          <h3 class="text-base font-bold text-slate-900">SAKSHAM AI Zero-Paywall Pledge</h3>
+        </div>
+        <button type="button" id="close-modal-btn" class="p-1 text-slate-400 hover:text-slate-700 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p class="text-sm text-slate-600 leading-relaxed">
+        <strong>One Platform. Endless Intelligence.</strong> Essential AI capabilities will always remain free for everyone—with zero mid-conversation ads, no compulsory subscriptions, and no forced payments.
+      </p>
+      <div class="bg-slate-50 rounded-xl p-3.5 text-xs text-slate-700 space-y-1.5 border border-slate-200">
+        <p><strong>Funded sustainably by:</strong></p>
+        <p>• Small, non-intrusive dashboard advertisements</p>
+        <p>• Business partnerships & affiliate commissions</p>
+        <p>• Paid commercial Business API access</p>
+        <p>• Corporate sponsorships</p>
+      </div>
+      <button type="button" id="confirm-modal-btn" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors">
+        Got it
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <span><strong>SAKSHAM AI</strong> — One Platform. Endless Intelligence.</span>
+      <span>Free for Everyone. Built for the Future.</span>
+    </div>
+  </footer>
+
+  <script>
+    const state = {
+      activeTab: 'workspace',
+      adIndex: 0,
+      selectedStageId: 1,
+      geminiApiKey: '',
+      isSending: false,
+      messages: [
+        {
+          role: 'assistant',
+          text: 'Welcome to SAKSHAM AI! Every essential AI feature here is 100% free, with zero ads interrupting our conversation. Click "Demo AI" in the top bar anytime to plug in a free Google Gemini API key for live AI responses.'
+        }
+      ],
+      stages: [
+        {
+          id: 1,
+          title: 'UI/UX Design',
+          status: 'completed',
+          summary: 'Design an accessible, distraction-free AI workspace with clear separation between free chat and dashboard monetization zones.',
+          deliverables: ['Design system & responsive web/mobile wireframes', 'Ad-free conversation layout', 'Dashboard partner & ad slot placement specs']
+        },
+        {
+          id: 2,
+          title: 'AI Integration',
+          status: 'in_progress',
+          summary: 'Connect free-tier LLM inference (Google Gemini / Groq) via a serverless Cloudflare Worker proxy with safety guardrails.',
+          deliverables: ['Free-tier LLM gateway', 'Streaming response pipeline', 'Context memory & safety guardrails']
+        },
+        {
+          id: 3,
+          title: 'Feature Development',
+          status: 'pending',
+          summary: 'Build essential user productivity tools—chat, document Q&A, code helper, and study modes—completely free.',
+          deliverables: ['Essential AI tool suite (free tier)', 'User dashboard & saved history', 'Business API key management portal']
+        },
+        {
+          id: 4,
+          title: 'Website + Android App',
+          status: 'pending',
+          summary: 'Launch unified cross-platform experiences on Cloudflare Pages (free hosting) and a native Android WebView app.',
+          deliverables: ['Responsive web platform', 'Native Android APK wrapper', 'Cross-device sync (no forced paywall)']
+        },
+        {
+          id: 5,
+          title: 'Monetisation and Launch',
+          status: 'pending',
+          summary: 'Activate ethical revenue channels—dashboard ads, business partnerships, affiliates, paid Business API, and corporate sponsorships.',
+          deliverables: ['Non-intrusive dashboard ad server', 'Paid Business API billing & SLAs', 'Partner & corporate sponsorship onboarding']
+        }
+      ]
+    };
+
+    const dashboardAds = [
+      { title: 'DevFlow Cloud', tagline: 'Deploy AI apps in 30 seconds. Get $100 free starter credits.', badge: 'Partner Ad' },
+      { title: 'FinTrack Pro', tagline: 'Automated GST & startup accounting built for modern teams.', badge: 'Sponsored' },
+      { title: 'LearnStack Academy', tagline: 'Hands-on AI engineering tracks for students & builders.', badge: 'Partner Ad' }
+    ];
+
+    let revenueChartInstance = null;
+
+    function loadSavedKey() {
+      try {
+        const saved = localStorage.getItem('saksham_gemini_key') || '';
+        state.geminiApiKey = saved;
+      } catch (e) {
+        state.geminiApiKey = '';
+      }
+      updateEngineBadge();
+    }
+
+    function updateEngineBadge() {
+      const label = document.getElementById('ai-engine-label');
+      const btn = document.getElementById('ai-engine-btn');
+      if (state.geminiApiKey) {
+        label.textContent = 'Live Gemini AI';
+        btn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors';
+      } else {
+        label.textContent = 'Demo AI';
+        btn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors';
+      }
+    }
+
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-xl shadow-lg border border-slate-700 animate-fade-up';
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 2800);
+    }
+
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      const activeView = document.getElementById(`view-${tabName}`);
+      if (activeView) activeView.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        const isActive = btn.dataset.tab === tabName;
+        btn.className = isActive
+          ? 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 bg-white text-indigo-600 shadow-sm'
+          : 'nav-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+      });
+
+      document.querySelectorAll('.mobile-nav-tab').forEach(btn => {
+        const isActive = btn.dataset.tab === tabName;
+        btn.className = isActive
+          ? 'mobile-nav-tab w-full text-left px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 bg-indigo-50 text-indigo-700'
+          : 'mobile-nav-tab w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 text-slate-600 hover:bg-slate-50';
+      });
+
+      document.getElementById('mobile-nav').classList.add('hidden');
+      if (tabName === 'revenue') updateRevenueModel();
+    }
+
+    function renderMessages() {
+      const container = document.getElementById('chat-messages');
+      container.innerHTML = '';
+      state.messages.forEach(msg => {
+        const wrapper = document.createElement('div');
+        wrapper.className = msg.role === 'user' ? 'flex justify-end animate-fade-up' : 'flex justify-start animate-fade-up';
+        const bubble = document.createElement('div');
+        bubble.className = msg.role === 'user'
+          ? 'max-w-[82%] bg-indigo-600 text-white rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed shadow-sm whitespace-pre-wrap'
+          : 'max-w-[85%] bg-slate-100 text-slate-800 rounded-2xl rounded-bl-sm px-4 py-3 text-sm leading-relaxed border border-slate-200 whitespace-pre-wrap';
+        bubble.textContent = msg.text;
+        wrapper.appendChild(bubble);
+        container.appendChild(wrapper);
+      });
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function generateDemoResponse(promptText) {
+      const lower = promptText.toLowerCase();
+      const mode = document.getElementById('ai-mode-select').value;
+      if (lower.includes('ad') || lower.includes('free') || lower.includes('pay')) {
+        return 'SAKSHAM AI keeps all essential AI features 100% free with zero ads inside conversations, no compulsory subscriptions, and no forced payments. Revenue comes from small dashboard ads, business partnerships, affiliate commissions, paid Business API access, and corporate sponsorships.';
+      }
+      if (lower.includes('$0') || lower.includes('earn') || lower.includes('budget')) {
+        return 'You can build and host SAKSHAM AI for $0 using free-tier tools: Cloudflare Pages (free web hosting), Cloudflare Workers (100k free API requests/day), Google AI Studio or Groq (free LLM tier), and Android Studio (free APK builds). Earn revenue via Google AdSense/partner dashboard ads, affiliate links, and paid Business API keys.';
+      }
+      if (lower.includes('stage') || lower.includes('roadmap') || lower.includes('launch')) {
+        return 'We are building SAKSHAM AI in 5 major stages: (1) UI/UX Design, (2) AI Integration, (3) Feature Development, (4) Website + Android App, and (5) Monetisation and Launch. Check the 5-Stage Roadmap tab to explore each milestone.';
+      }
+      if (mode === 'code') {
+        return `In Code & Architecture mode: Connect a free Gemini API key (top bar -> "Demo AI") to get live code generation, or deploy the included Cloudflare Worker proxy from the starter kit.`;
+      }
+      return `SAKSHAM AI (Demo Mode): Here is a clean, ad-free response to "${promptText}". Plug in a free Google Gemini API key via the top bar button to switch to live AI intelligence.`;
+    }
+
+    async function handleSendMessage(text) {
+      const trimmed = text.trim();
+      if (!trimmed || state.isSending) return;
+
+      state.messages.push({ role: 'user', text: trimmed });
+      renderMessages();
+
+      if (!state.geminiApiKey) {
+        setTimeout(() => {
+          state.messages.push({ role: 'assistant', text: generateDemoResponse(trimmed) });
+          renderMessages();
+        }, 280);
+        return;
+      }
+
+      state.isSending = true;
+      const sendBtn = document.getElementById('send-btn');
+      sendBtn.disabled = true;
+      state.messages.push({ role: 'assistant', text: 'Thinking...' });
+      renderMessages();
+
+      try {
+        const mode = document.getElementById('ai-mode-select').value;
+        const systemPrefix = `You are SAKSHAM AI (${mode} mode), a helpful, concise, free-for-everyone AI assistant.`;
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(state.geminiApiKey)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `${systemPrefix}\n\nUser: ${trimmed}` }] }]
+          })
+        });
+        const data = await res.json();
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        state.messages[state.messages.length - 1].text = reply || `API error: ${data?.error?.message || 'Unable to fetch response. Switched back to demo fallback.'}`;
+      } catch (err) {
+        state.messages[state.messages.length - 1].text = `Network error reaching Gemini API. Falling back to Demo Mode:\n\n${generateDemoResponse(trimmed)}`;
+      } finally {
+        state.isSending = false;
+        sendBtn.disabled = false;
+        renderMessages();
+      }
+    }
+
+    function renderDashboardAd() {
+      const ad = dashboardAds[state.adIndex];
+      const slot = document.getElementById('dashboard-ad-slot');
+      slot.innerHTML = `
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <span class="text-[10px] font-semibold text-indigo-600 uppercase tracking-wide">${ad.badge}</span>
+            <h4 class="text-sm font-bold text-slate-900 mt-0.5">${ad.title}</h4>
+          </div>
+          <button type="button" id="ad-learn-more-btn" class="text-xs font-semibold text-indigo-700 bg-white border border-indigo-200 px-2.5 py-1 rounded-lg hover:bg-indigo-50 shrink-0">
+            Visit
+          </button>
+        </div>
+        <p class="text-xs text-slate-600 mt-1.5">${ad.tagline}</p>
+      `;
+      document.getElementById('ad-learn-more-btn').addEventListener('click', () => {
+        showToast(`Opened partner spotlight: ${ad.title} (dashboard-only placement)`);
+      });
+    }
+
+    function updateRevenueModel() {
+      const mau = Number(document.getElementById('sim-mau').value);
+      const apiClients = Number(document.getElementById('sim-api-clients').value);
+      const sponsors = Number(document.getElementById('sim-sponsors').value);
+      const partners = Number(document.getElementById('sim-partners').value);
+
+      document.getElementById('val-mau').textContent = mau.toLocaleString();
+      document.getElementById('val-api-clients').textContent = apiClients.toLocaleString();
+      document.getElementById('val-sponsors').textContent = sponsors.toLocaleString();
+      document.getElementById('val-partners').textContent = partners.toLocaleString();
+
+      const revDashboardAds = Math.round((mau / 1000) * 45);
+      const revBusinessApi = apiClients * 199;
+      const revSponsors = sponsors * 3500;
+      const revPartnerships = partners * 600;
+      const revAffiliates = Math.round((mau / 1000) * 28 + partners * 150);
+
+      const total = revDashboardAds + revBusinessApi + revSponsors + revPartnerships + revAffiliates;
+      document.getElementById('total-monthly-rev').textContent = '$' + total.toLocaleString();
+
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      const dataValues = [revDashboardAds, revPartnerships, revAffiliates, revBusinessApi, revSponsors];
+
+      if (revenueChartInstance) {
+        revenueChartInstance.data.datasets[0].data = dataValues;
+        revenueChartInstance.update();
+      } else {
+        revenueChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Dashboard Ads', 'Business Partnerships', 'Affiliate Commissions', 'Paid Business API', 'Corporate Sponsorships'],
+            datasets: [{
+              data: dataValues,
+              backgroundColor: ['#4f46e5', '#06b6d4', '#f59e0b', '#10b981', '#8b5cf6'],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 12 } } } }
+          }
+        });
+      }
+    }
+
+    function renderRoadmap() {
+      const grid = document.getElementById('roadmap-stages-grid');
+      const completedCount = state.stages.filter(s => s.status === 'completed').length;
+      document.getElementById('roadmap-progress-badge').textContent = `${completedCount} / ${state.stages.length} Completed`;
+
+      grid.innerHTML = '';
+      state.stages.forEach(stage => {
+        const isSelected = stage.id === state.selectedStageId;
+        const statusColors = { completed: 'bg-emerald-100 text-emerald-700', in_progress: 'bg-amber-100 text-amber-700', pending: 'bg-slate-100 text-slate-600' };
+        const statusLabels = { completed: 'Completed', in_progress: 'In Progress', pending: 'Planned' };
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = isSelected
+          ? 'text-left p-3.5 rounded-xl border-2 border-indigo-600 bg-indigo-50/60 transition-all'
+          : 'text-left p-3.5 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 transition-all';
+        btn.innerHTML = `
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[11px] font-bold text-indigo-600">Stage ${stage.id}</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusColors[stage.status]}">${statusLabels[stage.status]}</span>
+          </div>
+          <div class="text-sm font-bold text-slate-900">${stage.title}</div>
+        `;
+        btn.addEventListener('click', () => { state.selectedStageId = stage.id; renderRoadmap(); });
+        grid.appendChild(btn);
+      });
+
+      const current = state.stages.find(s => s.id === state.selectedStageId);
+      const detail = document.getElementById('roadmap-detail-panel');
+      detail.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Stage ${current.id} of 5</span>
+            <h3 class="text-lg font-bold text-slate-900">${current.title}</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-500">Status:</span>
+            <select id="stage-status-select" class="text-xs font-semibold bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="pending" ${current.status === 'pending' ? 'selected' : ''}>Planned</option>
+              <option value="in_progress" ${current.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+              <option value="completed" ${current.status === 'completed' ? 'selected' : ''}>Completed</option>
+            </select>
+          </div>
+        </div>
+        <p class="text-sm text-slate-600 mb-4">${current.summary}</p>
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Key Deliverables</h4>
+          <ul class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            ${current.deliverables.map(item => `
+              <li class="bg-white border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-800 flex items-start gap-2">
+                <span class="text-indigo-600 font-bold">•</span>
+                <span>${item}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      `;
+
+      document.getElementById('stage-status-select').addEventListener('change', (e) => {
+        current.status = e.target.value;
+        renderRoadmap();
+        showToast(`Updated Stage ${current.id} (${current.title}) status`);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadSavedKey();
+      switchTab('workspace');
+      renderMessages();
+      renderDashboardAd();
+      renderRoadmap();
+
+      document.querySelectorAll('.nav-tab, .mobile-nav-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+      document.getElementById('brand-home-btn').addEventListener('click', () => switchTab('workspace'));
+      document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+        document.getElementById('mobile-nav').classList.toggle('hidden');
+      });
+
+      document.getElementById('chat-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('chat-input');
+        handleSendMessage(input.value);
+        input.value = '';
+      });
+
+      document.querySelectorAll('.quick-prompt-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleSendMessage(btn.textContent));
+      });
+
+      document.getElementById('clear-chat-btn').addEventListener('click', () => {
+        state.messages = [{ role: 'assistant', text: 'Started a fresh, ad-free conversation! Ask anything—essential AI features are always free.' }];
+        renderMessages();
+        showToast('Conversation reset');
+      });
+
+      document.getElementById('rotate-ad-btn').addEventListener('click', () => {
+        state.adIndex = (state.adIndex + 1) % dashboardAds.length;
+        renderDashboardAd();
+      });
+
+      document.getElementById('affiliate-cta-btn').addEventListener('click', () => {
+        showToast('Affiliate link previewed — zero markup for users');
+      });
+
+      ['sim-mau', 'sim-api-clients', 'sim-sponsors', 'sim-partners'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateRevenueModel);
+      });
+
+      document.querySelector('[data-action="launch-chat"]').addEventListener('click', () => switchTab('workspace'));
+
+      document.getElementById('generate-api-key-btn').addEventListener('click', () => {
+        const randomHex = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+        document.getElementById('api-key-value').textContent = `sk_saksham_biz_${randomHex}`;
+        document.getElementById('api-key-box').classList.remove('hidden');
+        showToast('Generated sandbox Business API key');
+      });
+
+      document.getElementById('copy-api-key-btn').addEventListener('click', () => {
+        const keyText = document.getElementById('api-key-value').textContent;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(keyText).then(() => showToast('API key copied to clipboard'));
+        } else {
+          const temp = document.createElement('textarea');
+          temp.value = keyText;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          temp.remove();
+          showToast('API key copied to clipboard');
+        }
+      });
+
+      document.getElementById('partner-inquiry-btn').addEventListener('click', () => showToast('Partnership & Sponsorship media kit ready'));
+
+      // AI Engine Modal
+      const engineModal = document.getElementById('ai-engine-modal');
+      document.getElementById('ai-engine-btn').addEventListener('click', () => {
+        document.getElementById('gemini-key-input').value = state.geminiApiKey;
+        engineModal.classList.remove('hidden');
+      });
+      document.getElementById('close-engine-modal-btn').addEventListener('click', () => engineModal.classList.add('hidden'));
+      document.getElementById('save-engine-key-btn').addEventListener('click', () => {
+        const key = document.getElementById('gemini-key-input').value.trim();
+        state.geminiApiKey = key;
+        try { localStorage.setItem('saksham_gemini_key', key); } catch (e) {}
+        updateEngineBadge();
+        engineModal.classList.add('hidden');
+        showToast(key ? 'Live Gemini AI activated!' : 'Switched to Demo AI');
+      });
+      document.getElementById('reset-engine-key-btn').addEventListener('click', () => {
+        state.geminiApiKey = '';
+        try { localStorage.removeItem('saksham_gemini_key'); } catch (e) {}
+        updateEngineBadge();
+        engineModal.classList.add('hidden');
+        showToast('Switched to Demo AI');
+      });
+
+      // Philosophy Modal
+      const modal = document.getElementById('philosophy-modal');
+      document.getElementById('philosophy-modal-btn').addEventListener('click', () => modal.classList.remove('hidden'));
+      document.getElementById('close-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
+      document.getElementById('confirm-modal-btn').addEventListener('click', () => modal.classList.add('hidden'));
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+    });
+  </script>
+</body>
+</html>
